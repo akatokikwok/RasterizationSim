@@ -1,5 +1,6 @@
 ﻿#include <Windows.h>
 #include "WindowsMessageMap.h"
+#include <sstream>
 
 // 自定义一个消息队列处理函数
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -10,6 +11,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg) {
 		case WM_CLOSE:// 鼠标点击关闭窗口上的时候,触发WM_CLOSE
 			PostQuitMessage(79);
+			break;
+		case WM_KEYDOWN:
+			if (wParam == 'D') {
+				SetWindowText(hWnd, "Respects");
+			}
+			break;
+		case WM_KEYUP:
+			if (wParam == 'F') {
+				SetWindowText(hWnd, "Dangerfield");
+			}
 			break;
 	}
 
