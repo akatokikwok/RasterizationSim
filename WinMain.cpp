@@ -25,16 +25,20 @@ int CALLBACK/*调用约定,即stdcall,参数传栈*/ WinMain(
 	RegisterClassEx(&wc);// 窗口类注册完毕
 	/// 创建窗口实例句柄
 	HWND hWnd = CreateWindowEx(
-		0, 
+		0,
 		pClassName/*具体的窗口实例名字*/,
 		"Happy Hard Window"/*窗口的名字*/,
-		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,/*窗口样式*/
+		WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU,/*窗口样式*/
 		200, 200, 640, 480,
 		nullptr/*父级窗口*/, nullptr, hInstance, nullptr
 	);
 	// 呈现展示此窗口(使用句柄)
 	ShowWindow(hWnd, SW_SHOW);
-	
-	while (true);// 阻止程序立刻退出
+
+	MSG msg;// 需要一个消息结构体,用以保存消息数据
+	while (GetMessage(&msg, nullptr, 0, 0) > 0) { // 持续获取线程里所有消息(因为非退出消息的其余所有消息均大于0)
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 	return 0;
 }
