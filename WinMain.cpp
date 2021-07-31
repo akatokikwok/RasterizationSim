@@ -22,6 +22,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				SetWindowText(hWnd, "Dangerfield");
 			}
 			break;
+		case WM_CHAR:// WM_CHAR适用于文本输入的消息类型,想输入一段文字,就会触发WM_CHAR,但如果按下F1或F2却不能,WM_CHAR对大小写敏感
+		{
+			static std::string title;// 这里处理的还是英文字母的ASCII码
+			title.push_back((char)wParam);
+			SetWindowText(hWnd, title.c_str());
+			break;
+		}
+		case WM_LBUTTONDOWN:// 鼠标左键按下时触发WM_LBUTTONDOWN
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			std::ostringstream oss;
+			oss << "(" << pt.x << "," << pt.y << ")";
+			SetWindowText(hWnd, oss.str().c_str());// 鼠标坐标打印成文本显示
+			break;
+		}
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -65,7 +80,7 @@ int CALLBACK/*调用约定,即stdcall,参数传栈*/ WinMain(
 	MSG msg;// 需要一个消息结构体,用以保存消息数据
 	BOOL gResult;
 	while (gResult = GetMessage(&msg, nullptr, 0, 0) > 0) { // 持续获取线程里所有消息(因为非退出消息的其余所有消息均大于0)
-		TranslateMessage(&msg);
+		TranslateMessage(&msg);// 此API可能会在适当条件下把WM_KEYDOWN同时转换成了WM_CHAR,如若注释掉,则不会显示WM_CHAR消息
 		DispatchMessage(&msg);
 	}
 	if (gResult == -1) {
