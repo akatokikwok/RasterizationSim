@@ -4,8 +4,8 @@
 // 自定义一个消息队列处理函数
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static WindowsMessageMap mm;
-	OutputDebugString(mm(msg, lParam, wParam).c_str());
+	static WindowsMessageMap mm;// 有一张静态的消息映射无序表,mm;静态变量每次的值会存活一段时间保持到下一次调用，直到下次赋新值
+	OutputDebugString(mm(msg, lParam, wParam).c_str());// 使用重载运算符计算出mm里的消息的格式化字符串,并打印出消息的字符串
 
 	switch (msg) {
 		case WM_CLOSE:// 鼠标点击关闭窗口上的时候,触发WM_CLOSE

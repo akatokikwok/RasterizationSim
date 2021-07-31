@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 
-// secret messages
+// 秘密消息
 #define WM_UAHDESTROYWINDOW 0x0090
 #define WM_UAHDRAWMENU 0x0091
 #define WM_UAHDRAWMENUITEM 0x0092
@@ -12,11 +12,11 @@
 #define WM_UAHMEASUREMENUITEM 0x0094
 #define WM_UAHNCPAINTMENUPOPUP 0x0095
 
-#define REGISTER_MESSAGE(msg){msg,#msg}
+#define REGISTER_MESSAGE(msg){msg,#msg}// 仅在大括号里输出msg而已,#号负责把某个对象转成"字符串"
 
 WindowsMessageMap::WindowsMessageMap()
 	:
-	map({
+	map({// 把消息符号ID,统统映射成"字符串"
 		REGISTER_MESSAGE(WM_CREATE),
 		REGISTER_MESSAGE(WM_DESTROY),
 		REGISTER_MESSAGE(WM_MOVE),
@@ -200,10 +200,11 @@ WindowsMessageMap::WindowsMessageMap()
 		})
 {}
 
+// 重载运算符(), 负责返回一个格式化字符串
 std::string WindowsMessageMap::operator()(DWORD msg, LPARAM lp, WPARAM wp) const
 {
 	constexpr int firstColWidth = 25;
-	const auto i = map.find(msg);
+	const auto i = map.find(msg);// i是找到的对应的消息的迭代器
 
 	std::ostringstream oss;
 	if (i != map.end()) {
