@@ -1,8 +1,12 @@
 ﻿#include <Windows.h>
+#include "WindowsMessageMap.h"
 
 // 自定义一个消息队列处理函数
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	static WindowsMessageMap mm;
+	OutputDebugString(mm(msg, lParam, wParam).c_str());
+
 	switch (msg) {
 		case WM_CLOSE:// 鼠标点击关闭窗口上的时候,触发WM_CLOSE
 			PostQuitMessage(79);
