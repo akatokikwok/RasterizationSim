@@ -1,5 +1,17 @@
 ﻿#include <Windows.h>
 
+// 自定义一个消息队列处理函数
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg) {
+		case WM_CLOSE:// 鼠标点击关闭窗口上的时候,触发WM_CLOSE
+			PostQuitMessage(79);
+			break;
+	}
+
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
 int CALLBACK/*调用约定,即stdcall,参数传栈*/ WinMain(
 	HINSTANCE hInstance,/*指向结构指针,例如加载进内存*/
 	HINSTANCE hPrevInstance,
@@ -12,7 +24,7 @@ int CALLBACK/*调用约定,即stdcall,参数传栈*/ WinMain(
 	WNDCLASSEX wc = { 0 };
 	wc.cbSize = sizeof(wc);			// 值就是窗口类的大小
 	wc.style = CS_OWNDC;			// 使用CS_OWNDC给窗口一个device context,迫使窗口被独立渲染
-	wc.lpfnWndProc = DefWindowProc; // 此字段负责处理所有有关窗口的消息,通常与外部的一个消息处理函数绑定
+	wc.lpfnWndProc = WndProc;		// 此字段负责处理所有有关窗口的消息,通常与外部的一个消息处理函数绑定
 	wc.cbClsExtra = 0;				// 可以用它存储数据,但是暂时设为空
 	wc.cbWndExtra = 0;				// 用于给每个窗口实例分配字节
 	wc.hInstance = hInstance;		// 即WinMain入口的入参
@@ -36,9 +48,15 @@ int CALLBACK/*调用约定,即stdcall,参数传栈*/ WinMain(
 	ShowWindow(hWnd, SW_SHOW);
 
 	MSG msg;// 需要一个消息结构体,用以保存消息数据
-	while (GetMessage(&msg, nullptr, 0, 0) > 0) { // 持续获取线程里所有消息(因为非退出消息的其余所有消息均大于0)
+	BOOL gResult;
+	while (gResult = GetMessage(&msg, nullptr, 0, 0) > 0) { // 持续获取线程里所有消息(因为非退出消息的其余所有消息均大于0)
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	return 0;
+	if (gResult == -1) {
+		return -1;// 如若gResult值为-1,就返回-1,表明此处有错误
+	}
+	else {
+		return msg.wParam;// wParam表示我们想要的结果,即测试用的79
+	}
 }
