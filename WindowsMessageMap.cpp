@@ -204,7 +204,7 @@ WindowsMessageMap::WindowsMessageMap()
 std::string WindowsMessageMap::operator()(DWORD msg, LPARAM lp, WPARAM wp) const
 {
 	constexpr int firstColWidth = 25;
-	const auto i = map.find(msg);// i是找到的对应的消息的迭代器
+	const auto i = map.find(msg);// i是找到的对应的消息的迭代器 ; 用find函数来定位数据出现位置，它返回的一个迭代器，当数据出现时，它返回数据所在位置的迭代器，如果map中没有要查找的数据，它返回的迭代器等于end函数返回的迭代器
 
 	std::ostringstream oss;
 	if (i != map.end()) {

@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+/* 
+* 在别的文件里包含ChiliWin.h,将使用我们自己设计的宏
+ */
 // target Windows 7 or later
 #define _WIN32_WINNT 0x0601
 #include <sdkddkver.h>
