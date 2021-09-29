@@ -1,5 +1,6 @@
 ﻿#include "Window.h"
 #include <sstream>
+#include "resource.h"
 
 // Window Class Stuff
 Window::WindowClass Window::WindowClass::wndClass;
@@ -15,12 +16,18 @@ Window::WindowClass::WindowClass() noexcept
 	wc.cbClsExtra = 0;				// 可以用它存储数据,但是暂时设为空
 	wc.cbWndExtra = 0;				// 用于给每个窗口实例分配字节
 	wc.hInstance = GetInstance();	// 即WinMain入口的入参
-	wc.hIcon = nullptr;				// 用于定义图标
+	wc.hIcon = static_cast<HICON>(LoadImage(
+		GetInstance(), MAKEINTRESOURCE(IDI_ICON2),
+		IMAGE_ICON, 32, 32, 0
+	));								// 用于定义图标
 	wc.hCursor = nullptr;			// 用于定义鼠标
 	wc.hbrBackground = nullptr;		// GDI据此绘制窗口背景,社为空表示弃用GDI需要人手动绘制背景
 	wc.lpszMenuName = nullptr;		// 暂设为空
 	wc.lpszClassName = GetName();	// 表示窗口实例依赖于哪个className开始绘制
-	wc.hIconSm = nullptr;			// 用于给不同的窗口设置不同的图标
+	wc.hIconSm = static_cast<HICON>(LoadImage(
+		GetInstance(), MAKEINTRESOURCE(IDI_ICON1),
+		IMAGE_ICON, 16, 16, 0
+	));								// 用于给不同的窗口设置不同的图标
 	RegisterClassEx(&wc);// 窗口类注册完毕
 }
 
