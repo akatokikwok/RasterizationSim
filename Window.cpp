@@ -1,5 +1,6 @@
 ﻿#include "Window.h"
-
+#include <sstream>
+#include "resource.h"
 
 // Window Class Stuff
 Window::WindowClass Window::WindowClass::wndClass;
@@ -15,12 +16,18 @@ Window::WindowClass::WindowClass() noexcept
 	wc.cbClsExtra = 0;				// 可以用它存储数据,但是暂时设为空
 	wc.cbWndExtra = 0;				// 用于给每个窗口实例分配字节
 	wc.hInstance = GetInstance();	// 即WinMain入口的入参
-	wc.hIcon = nullptr;				// 用于定义图标
+	wc.hIcon = static_cast<HICON>(LoadImage(
+		GetInstance(), MAKEINTRESOURCE(IDI_ICON2),
+		IMAGE_ICON, 32, 32, 0
+	));								// 用于定义图标
 	wc.hCursor = nullptr;			// 用于定义鼠标
 	wc.hbrBackground = nullptr;		// GDI据此绘制窗口背景,社为空表示弃用GDI需要人手动绘制背景
 	wc.lpszMenuName = nullptr;		// 暂设为空
 	wc.lpszClassName = GetName();	// 表示窗口实例依赖于哪个className开始绘制
-	wc.hIconSm = nullptr;			// 用于给不同的窗口设置不同的图标
+	wc.hIconSm = static_cast<HICON>(LoadImage(
+		GetInstance(), MAKEINTRESOURCE(IDI_ICON1),
+		IMAGE_ICON, 16, 16, 0
+	));								// 用于给不同的窗口设置不同的图标
 	RegisterClassEx(&wc);// 窗口类注册完毕
 }
 
@@ -41,7 +48,7 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept
 
 
 // Window Stuff
-Window::Window(int width, int height, const char* name) noexcept
+Window::Window(int width, int height, const char* name)
 {
 	// Client区域,不包括标题栏和边框
 	RECT wr;
@@ -49,8 +56,14 @@ Window::Window(int width, int height, const char* name) noexcept
 	wr.right = width + wr.left;
 	wr.top = 100;
 	wr.bottom = height + wr.top;
-	AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
-		FALSE/*是否具备菜单*/);// 自适应匹配窗口尺寸
+
+	if (FAILED(
+		AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
+		FALSE/*是否具备菜单*/))/*自适应匹配窗口尺寸*/ 
+	   ) 
+	{
+		throw CHWND_LAST_EXCEPT();
+	}
 
 	/// 创建窗口实例句柄
 	hWnd = CreateWindow(
@@ -61,6 +74,11 @@ Window::Window(int width, int height, const char* name) noexcept
 		wr.right - wr.left, wr.bottom - wr.top, // 这两个表示窗口尺寸
 		nullptr/*父级窗口*/, nullptr, WindowClass::GetInstance(), this/*设置为本窗口实例this*/
 	);
+	// check for error
+	if (hWnd == nullptr) {
+		throw CHWND_LAST_EXCEPT();
+	}
+
 	// 呈现展示此窗口(使用句柄)
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
 }
@@ -109,4 +127,62 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	}
 	// 返回默认的消息处理lpfn
 	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+
+// Window Exception Stuff
+Window::Exception::Exception(int line, const char* file, HRESULT hr) noexcept
+	:
+	ChiliException(line, file),// 调异常基类的构造器
+	hr(hr)
+{}
+
+/// 打印所有的错误信息 (主要是本类4个成员方法的信息)
+const char* Window::Exception::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl
+		<< "[Error Code] " << GetErrorCode() << std::endl
+		<< "[Description] " << GetErrorString() << std::endl
+		<< GetOriginString();
+	
+	whatBuffer = oss.str();
+	return whatBuffer.c_str();
+}
+
+/// 在窗口类中 把异常种类视作 特有的字符串"grb Window Exception"
+const char* Window::Exception::GetType() const noexcept
+{
+	return "grb Window Exception";
+}
+
+/// 负责把句柄类型 的错误信息转化成字符串
+std::string Window::Exception::TranslateErrorCode(HRESULT hr) noexcept
+{
+	char* pMsgBuf = nullptr; // 这个指针专门负责 指向 携带错误信息的字符串
+	DWORD nMsgLen = FormatMessage( // FormatMessage内建接口负责把 HR转成 字符串型; nMsgLen表示是错误代码的长度
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPSTR>(&pMsgBuf), 0, nullptr
+	);
+	if (nMsgLen == 0) {
+		return "Unidentified error code";
+	}
+
+	std::string errorString = pMsgBuf;
+	LocalFree(pMsgBuf);
+	return errorString;
+}
+
+/// 仅拿取hr句柄,这个句柄里信息丰富,保存着错误讯息
+HRESULT Window::Exception::GetErrorCode() const noexcept
+{
+	return hr;
+}
+
+/// 仅调用 TranslateErrorCode
+std::string Window::Exception::GetErrorString() const noexcept
+{
+	return TranslateErrorCode(hr);
 }
