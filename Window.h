@@ -9,9 +9,9 @@ public:/// 继承自1个异常类,并分析
 	{
 	public:
 		Exception(int line, const char* file, HRESULT hr) noexcept;
-		
+
 		const char* what() const noexcept override;/// 打印所有的错误信息 (主要是本类4个成员方法的信息)
-		
+
 		virtual const char* GetType() const noexcept;			   // 重写父类的 获取异常种类
 		static std::string TranslateErrorCode(HRESULT hr) noexcept;// 负责把句柄类型 的错误信息转化成字符串
 		HRESULT GetErrorCode() const noexcept;					   // 仅拿取hr句柄,这个句柄里信息丰富,保存着错误讯息
@@ -41,7 +41,7 @@ private:
 
 public:
 	/* 构造器,负责注册并呈现窗口*/
-	Window(int width, int height, const char* name) noexcept;
+	Window(int width, int height, const char* name);
 	/* 析构器仅负责 调用DestroyWindow系统API销毁窗口句柄*/
 	~Window();
 	Window(const Window&) = delete;
@@ -60,3 +60,4 @@ private:
 
 // error exception helper macro
 #define CHWND_EXCEPT( hr ) Window::Exception( __LINE__, __FILE__, hr ) 
+#define CHWND_LAST_EXCEPT() Window::Exception( __LINE__, __FILE__, GetLastError() )

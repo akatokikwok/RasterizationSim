@@ -9,7 +9,7 @@ int CALLBACK/*调用约定,即stdcall,参数传栈*/ WinMain(
 {
 	try {
 		// 填好窗口尺寸和窗口本身名字; 这个类的构造器和析构器负责创建和销毁窗口; PS!!!若调用2次构造器则允许创建2个窗口
-		Window wnd(800, 300, "郭的测试窗口 Box");
+		Window wnd(800, 300, "郭的测试窗口-----Box");
 
 		MSG msg;// 需要一个消息结构体,用以保存消息数据
 		BOOL gResult;

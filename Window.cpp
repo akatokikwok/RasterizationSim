@@ -41,7 +41,7 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept
 
 
 // Window Stuff
-Window::Window(int width, int height, const char* name) noexcept
+Window::Window(int width, int height, const char* name)
 {
 	// Client区域,不包括标题栏和边框
 	RECT wr;
@@ -49,8 +49,14 @@ Window::Window(int width, int height, const char* name) noexcept
 	wr.right = width + wr.left;
 	wr.top = 100;
 	wr.bottom = height + wr.top;
-	AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
-		FALSE/*是否具备菜单*/);// 自适应匹配窗口尺寸
+
+	if (FAILED(
+		AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
+		FALSE/*是否具备菜单*/))/*自适应匹配窗口尺寸*/ 
+	   ) 
+	{
+		throw CHWND_LAST_EXCEPT();
+	}
 
 	/// 创建窗口实例句柄
 	hWnd = CreateWindow(
@@ -61,6 +67,11 @@ Window::Window(int width, int height, const char* name) noexcept
 		wr.right - wr.left, wr.bottom - wr.top, // 这两个表示窗口尺寸
 		nullptr/*父级窗口*/, nullptr, WindowClass::GetInstance(), this/*设置为本窗口实例this*/
 	);
+	// check for error
+	if (hWnd == nullptr) {
+		throw CHWND_LAST_EXCEPT();
+	}
+
 	// 呈现展示此窗口(使用句柄)
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
 }
