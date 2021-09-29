@@ -1,5 +1,5 @@
 ﻿#include "Window.h"
-
+#include <sstream>
 
 // Window Class Stuff
 Window::WindowClass Window::WindowClass::wndClass;
@@ -109,4 +109,62 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	}
 	// 返回默认的消息处理lpfn
 	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+
+// Window Exception Stuff
+Window::Exception::Exception(int line, const char* file, HRESULT hr) noexcept
+	:
+	ChiliException(line, file),// 调异常基类的构造器
+	hr(hr)
+{}
+
+/// 打印所有的错误信息 (主要是本类4个成员方法的信息)
+const char* Window::Exception::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl
+		<< "[Error Code] " << GetErrorCode() << std::endl
+		<< "[Description] " << GetErrorString() << std::endl
+		<< GetOriginString();
+	
+	whatBuffer = oss.str();
+	return whatBuffer.c_str();
+}
+
+/// 在窗口类中 把异常种类视作 特有的字符串"grb Window Exception"
+const char* Window::Exception::GetType() const noexcept
+{
+	return "grb Window Exception";
+}
+
+/// 负责把句柄类型 的错误信息转化成字符串
+std::string Window::Exception::TranslateErrorCode(HRESULT hr) noexcept
+{
+	char* pMsgBuf = nullptr; // 这个指针专门负责 指向 携带错误信息的字符串
+	DWORD nMsgLen = FormatMessage( // FormatMessage内建接口负责把 HR转成 字符串型; nMsgLen表示是错误代码的长度
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPSTR>(&pMsgBuf), 0, nullptr
+	);
+	if (nMsgLen == 0) {
+		return "Unidentified error code";
+	}
+
+	std::string errorString = pMsgBuf;
+	LocalFree(pMsgBuf);
+	return errorString;
+}
+
+/// 仅拿取hr句柄,这个句柄里信息丰富,保存着错误讯息
+HRESULT Window::Exception::GetErrorCode() const noexcept
+{
+	return hr;
+}
+
+/// 仅调用 TranslateErrorCode
+std::string Window::Exception::GetErrorString() const noexcept
+{
+	return TranslateErrorCode(hr);
 }

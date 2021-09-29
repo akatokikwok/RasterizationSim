@@ -1,10 +1,28 @@
 ﻿#pragma once
 #include "ChiliWin.h"
+#include "ChiliException.h"
 
 class Window
 {
+public:/// 继承自1个异常类,并分析
+	class Exception : public ChiliException
+	{
+	public:
+		Exception(int line, const char* file, HRESULT hr) noexcept;
+		
+		const char* what() const noexcept override;/// 打印所有的错误信息 (主要是本类4个成员方法的信息)
+		
+		virtual const char* GetType() const noexcept;			   // 重写父类的 获取异常种类
+		static std::string TranslateErrorCode(HRESULT hr) noexcept;// 负责把句柄类型 的错误信息转化成字符串
+		HRESULT GetErrorCode() const noexcept;					   // 仅拿取hr句柄,这个句柄里信息丰富,保存着错误讯息
+		std::string GetErrorString() const noexcept;			   // 仅调用 TranslateErrorCode
+	private:
+		HRESULT hr;// 异常类子类里自带1个句柄
+	};
+
+
 private:
-	/// 类种类, 单例来负责管理 WindowClass的注册与清理
+	/// 类中类, 单例来负责管理 WindowClass的注册与清理
 	class WindowClass
 	{
 	public:
@@ -19,6 +37,8 @@ private:
 		static WindowClass wndClass; // 由于仅有1个窗口,所以设计仅1个窗口实例
 		HINSTANCE hInst;
 	};
+
+
 public:
 	/* 构造器,负责注册并呈现窗口*/
 	Window(int width, int height, const char* name) noexcept;
@@ -37,3 +57,6 @@ private:
 	int height;
 	HWND hWnd;// 被创建出的窗口的句柄
 };
+
+// error exception helper macro
+#define CHWND_EXCEPT( hr ) Window::Exception( __LINE__, __FILE__, hr ) 
