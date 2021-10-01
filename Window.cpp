@@ -132,12 +132,17 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 
 			/*********** KEYBOARD MESSAGES ***********/
 		case WM_KEYDOWN:
+
+			// 在这种case里 诸如ALT key (VK_MENU) and F10的系统键位才会被认出来
+		case WM_SYSKEYDOWN:
 			if (!(lParam & 0x40000000) || kbd.AutorepeatIsEnabled()) // 此判断是为了过滤重复按键,仅需要按键的一次消息就足够了
 			{
 				kbd.OnKeyPressed(static_cast<unsigned char>(wParam));
 			}
 			break;
 		case WM_KEYUP:
+
+		case WM_SYSKEYUP:
 			kbd.OnKeyReleased(static_cast<unsigned char>(wParam));
 			break;
 		case WM_CHAR:
