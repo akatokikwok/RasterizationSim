@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "ChiliWin.h"
 #include "ChiliException.h"
+#include "Keyboard.h"
 
 class Window
 {
@@ -52,6 +53,8 @@ private:
 	static LRESULT CALLBACK HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	/* 供上面2个静态消息处理函数 调用,使用此函数间接地参与消息处理机制*/
 	LRESULT HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+public:
+	Keyboard kbd;// 持有1个键盘,键盘类本质上是窗口类控制字符的一种延伸思想
 private:
 	int width;
 	int height;
