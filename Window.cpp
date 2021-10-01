@@ -118,12 +118,24 @@ LRESULT WINAPI Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
 }
 
+/// 供上面2个静态消息处理函数 调用,使用此函数间接地参与消息处理机制
 LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	switch (msg) {
 		case WM_CLOSE:
 			PostQuitMessage(0);// 这一步表示当点了关闭窗口,仅会post消息而非销毁窗口,因为销毁工作是在析构器里负责的
 			return 0;
+			/*********** KEYBOARD MESSAGES ***********/
+		case WM_KEYDOWN:
+			kbd.OnKeyPressed(static_cast<unsigned char>(wParam));
+			break;
+		case WM_KEYUP:
+			kbd.OnKeyReleased(static_cast<unsigned char>(wParam));
+			break;
+		case WM_CHAR:
+			kbd.OnChar(static_cast<unsigned char>(wParam));
+			break;
+			/*********** END KEYBOARD MESSAGES ***********/
 	}
 	// 返回默认的消息处理lpfn
 	return DefWindowProc(hWnd, msg, wParam, lParam);
