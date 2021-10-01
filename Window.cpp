@@ -132,7 +132,10 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 
 			/*********** KEYBOARD MESSAGES ***********/
 		case WM_KEYDOWN:
-			kbd.OnKeyPressed(static_cast<unsigned char>(wParam));
+			if (!(lParam & 0x40000000) || kbd.AutorepeatIsEnabled()) // 此判断是为了过滤重复按键,仅需要按键的一次消息就足够了
+			{
+				kbd.OnKeyPressed(static_cast<unsigned char>(wParam));
+			}
 			break;
 		case WM_KEYUP:
 			kbd.OnKeyReleased(static_cast<unsigned char>(wParam));
