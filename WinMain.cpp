@@ -16,9 +16,9 @@ int CALLBACK/*调用约定,即stdcall,参数传栈*/ WinMain(
 		while (gResult = GetMessage(&msg, nullptr, 0, 0) > 0) { // 持续获取线程里所有消息(因为非退出消息的其余所有消息均大于0)
 			TranslateMessage(&msg);// 此API可能会在适当条件下把WM_KEYDOWN同时转换成了WM_CHAR,如若注释掉,则不会显示WM_CHAR消息
 			DispatchMessage(&msg);
-			//if (wnd.kbd.KeyIsPressed(VK_SPACE)) {// 按下空格键会触发一个弹窗
-			//	MessageBox(nullptr, "Something Happen-弹窗内容!", "Space Key Was Pressed-弹窗标题", MB_OK | MB_ICONEXCLAMATION);
-			//}
+			if (wnd.kbd.KeyIsPressed(VK_MENU)) {// VK_MENU对应的是alt键位
+				MessageBox(nullptr, "Something Happon!", "The alt key was pressed", MB_OK | MB_ICONEXCLAMATION);
+			}
 		}
 		if (gResult == -1) {
 			return -1;// 如若gResult值为-1,就返回-1,表明此处有错误
