@@ -125,6 +125,11 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 		case WM_CLOSE:
 			PostQuitMessage(0);// 这一步表示当点了关闭窗口,仅会post消息而非销毁窗口,因为销毁工作是在析构器里负责的
 			return 0;
+			/*********** 当主窗口失去了焦点,焦点落在别的消息窗时候,需要清除那个256位的bitset ***********/
+		case WM_KILLFOCUS:
+			kbd.ClearState();
+			break;
+
 			/*********** KEYBOARD MESSAGES ***********/
 		case WM_KEYDOWN:
 			kbd.OnKeyPressed(static_cast<unsigned char>(wParam));
