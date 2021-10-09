@@ -2,6 +2,7 @@
 #include "ChiliWin.h"
 #include "ChiliException.h"
 #include "Keyboard.h"
+#include "Mouse.h"
 
 class Window
 {
@@ -55,6 +56,7 @@ private:
 	LRESULT HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 public:
 	Keyboard kbd;// 持有1个键盘,键盘类本质上是窗口类控制字符的一种延伸思想
+	Mouse mouse; // 持有1个鼠标
 private:
 	int width;
 	int height;

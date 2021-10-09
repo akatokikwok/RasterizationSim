@@ -59,9 +59,8 @@ Window::Window(int width, int height, const char* name)
 
 	if (FAILED(
 		AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
-		FALSE/*是否具备菜单*/))/*自适应匹配窗口尺寸*/ 
-	   ) 
-	{
+			FALSE/*是否具备菜单*/))/*自适应匹配窗口尺寸*/
+		) {
 		throw CHWND_LAST_EXCEPT();
 	}
 
@@ -104,7 +103,7 @@ LRESULT WINAPI Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		// forward message to window class handler
 		return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
 	}
-	
+
 	// 科普,窗口被创建 早于 WM_CREATE的时间点
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
@@ -149,6 +148,49 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 			kbd.OnChar(static_cast<unsigned char>(wParam));
 			break;
 			/*********** END KEYBOARD MESSAGES ***********/
+
+			/************* MOUSE MESSAGES ****************/
+		case WM_MOUSEMOVE:
+		{
+			POINTS pt = MAKEPOINTS(lParam);// 科普:一般lParam储存光标的坐标位置
+			mouse.OnMouseMove(pt.x, pt.y);
+		}
+		case WM_LBUTTONDOWN:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			mouse.OnLeftPressed(pt.x, pt.y);
+			break;
+		}
+		case WM_RBUTTONDOWN:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			mouse.OnRightPressed(pt.x, pt.y);
+			break;
+		}
+		case WM_LBUTTONUP:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			mouse.OnLeftReleased(pt.x, pt.y);
+			break;
+		}
+		case WM_RBUTTONUP:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			mouse.OnRightReleased(pt.x, pt.y);
+			break;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {// 利用wParam的正负值判定滚轮方向
+				mouse.OnWheelUp(pt.x, pt.y);
+			}
+			else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
+				mouse.OnWheelDown(pt.x, pt.y);
+			}
+			break;
+		}
+		/************** END MOUSE MESSAGES **************/
 	}
 	// 返回默认的消息处理lpfn
 	return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -170,7 +212,7 @@ const char* Window::Exception::what() const noexcept
 		<< "[Error Code] " << GetErrorCode() << std::endl
 		<< "[Description] " << GetErrorString() << std::endl
 		<< GetOriginString();
-	
+
 	whatBuffer = oss.str();
 	return whatBuffer.c_str();
 }
