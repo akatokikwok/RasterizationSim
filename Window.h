@@ -60,8 +60,8 @@ public:
 	Keyboard kbd;// 持有1个键盘,键盘类本质上是窗口类控制字符的一种延伸思想
 	Mouse mouse; // 持有1个鼠标
 private:
-	int width;
-	int height;
+	int width; // 游戏窗口宽度
+	int height;// 游戏窗口高度
 	HWND hWnd;// 被创建出的窗口的句柄
 };
 

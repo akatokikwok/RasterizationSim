@@ -18,6 +18,8 @@ public:
 			WheelUp,
 			WheelDown,
 			Move,
+			Enter,
+			Leave,
 			Invalid
 		};
 	private:
@@ -35,6 +37,7 @@ public:
 			x(0),
 			y(0)
 		{}
+		/* 鼠标Event的主要构造器, 主要负责用一个鼠标类的成员去填充构造1个Event*/
 		Event(Type type, const Mouse& parent) noexcept
 			:
 			type(type),
@@ -79,6 +82,7 @@ public:
 	std::pair<int, int> GetPos() const noexcept;
 	int GetPosX() const noexcept;
 	int GetPosY() const noexcept;
+	bool IsInWindow() const noexcept;// 用以控制出了窗口,窗口内仍然能接收到鼠标消息
 	bool LeftIsPressed() const noexcept;
 	bool RightIsPressed() const noexcept;
 	Mouse::Event Read() noexcept;
@@ -89,6 +93,8 @@ public:
 	void Flush() noexcept;
 private:
 	void OnMouseMove(int x, int y) noexcept;
+	void OnMouseLeave() noexcept;// 用以控制出了窗口,窗口内仍然能接收到鼠标消息
+	void OnMouseEnter() noexcept;// 用以控制出了窗口,窗口内仍然能接收到鼠标消息
 	void OnLeftPressed(int x, int y) noexcept;
 	void OnLeftReleased(int x, int y) noexcept;
 	void OnRightPressed(int x, int y) noexcept;
@@ -102,5 +108,6 @@ private:
 	int y;
 	bool leftIsPressed = false;
 	bool rightIsPressed = false;
+	bool isInWindow = false; // 监测光标是否离屏; 用以控制出了窗口,窗口内仍然能接收到鼠标消息
 	std::queue<Event> buffer;// 事件队列
 };
