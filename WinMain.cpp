@@ -17,23 +17,6 @@ int CALLBACK/*调用约定,即stdcall,参数传栈*/ WinMain(
 		while (gResult = GetMessage(&msg, nullptr, 0, 0) > 0) { // 持续获取线程里所有消息(因为非退出消息的其余所有消息均大于0)
 			TranslateMessage(&msg);// 此API可能会在适当条件下把WM_KEYDOWN同时转换成了WM_CHAR,如若注释掉,则不会显示WM_CHAR消息
 			DispatchMessage(&msg);
-
-			// test 测试光标离屏和进屏
-			while (!wnd.mouse.IsEmpty()) {
-				const auto e = wnd.mouse.Read();
-				switch (e.GetType()) {
-					case Mouse::Event::Type::Leave:
-						wnd.SetTitle("Gone!");
-						break;
-					case Mouse::Event::Type::Move:
-					{
-						std::ostringstream oss;
-						oss << "Mouse moved to (" << e.GetPosX() << "," << e.GetPosY() << ")";
-						wnd.SetTitle(oss.str());
-					}
-					break;
-				}
-			}
 		}
 		if (gResult == -1) {
 			return -1;// 如若gResult值为-1,就返回-1,表明此处有错误
