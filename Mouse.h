@@ -101,6 +101,7 @@ private:
 	void OnRightReleased(int x, int y) noexcept;
 	void OnWheelUp(int x, int y) noexcept;
 	void OnWheelDown(int x, int y) noexcept;
+	void OnWheelDelta(int x, int y, int delta) noexcept;
 	void TrimBuffer() noexcept;
 private:
 	static constexpr unsigned int bufferSize = 16u;// 缓存上限阈值,仅拿来做是否被修剪的判断标准用
@@ -109,5 +110,6 @@ private:
 	bool leftIsPressed = false;
 	bool rightIsPressed = false;
 	bool isInWindow = false; // 监测光标是否离屏; 用以控制出了窗口,窗口内仍然能接收到鼠标消息
+	int wheelDeltaCarry = 0;// 滑轮的delta计数
 	std::queue<Event> buffer;// 事件队列
 };
