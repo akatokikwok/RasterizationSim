@@ -3,6 +3,7 @@
 #include "ChiliException.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include <optional>
 
 class Window
 {
@@ -50,6 +51,7 @@ public:
 	Window& operator=(const Window&) = delete;
 
 	void SetTitle(const std::string& title);// 设置窗口标题为指定字符串,仅用于测试功能
+	static std::optional<int> ProcessMessages();// 专门用以处理消息循环的函数
 private:
 	/* 窗口的消息机制处理函数, 设计成静态的原因是 我们不可以通过WinAPI调用类成员函数*/
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;

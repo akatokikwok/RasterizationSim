@@ -90,6 +90,26 @@ void Window::SetTitle(const std::string& title)
 	}
 }
 
+std::optional<int> Window::ProcessMessages()
+{
+	MSG msg;
+	// while queue has messages, remove and dispatch them (but do not block on empty queue)
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) { // 持续监测消息,即使没有不存在消息此内建API仍然生效
+		// check for quit because peekmessage does not signal this via return val
+		if (msg.message == WM_QUIT) { // 先手动检查一下收到的消息是不是 WM_QUIT
+			// return optional wrapping int (arg to PostQuitMessage is in wparam) signals quit
+			return msg.wParam;
+		}
+
+		// TranslateMessage will post auxilliary WM_CHAR messages from key msgs
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}// 持续while中循环,直至消息队列里不再有消息,然后返回空的optional
+
+	// return empty optional when not quitting app
+	return {};
+}
+
 Window::~Window()
 {
 	DestroyWindow(hWnd);// 仅负责 调用DestroyWindow系统API销毁窗口句柄
