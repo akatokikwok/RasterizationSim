@@ -49,6 +49,8 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept
 
 // Window Stuff
 Window::Window(int width, int height, const char* name)
+	:width(width)
+	,height(height)
 {
 	// Client区域,不包括标题栏和边框
 	RECT wr;
@@ -153,13 +155,14 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 		case WM_CHAR:
 			kbd.OnChar(static_cast<unsigned char>(wParam));
 			break;
-			/*********** END KEYBOARD MESSAGES ***********/
+		/*********** END KEYBOARD MESSAGES ***********/
 
-			/************* MOUSE MESSAGES ****************/
+		/************* MOUSE MESSAGES ****************/
 		case WM_MOUSEMOVE:
 		{
-			POINTS pt = MAKEPOINTS(lParam);// 科普:一般lParam储存光标的坐标位置
+			const POINTS pt = MAKEPOINTS(lParam);// 科普:一般lParam储存光标的坐标位置
 			mouse.OnMouseMove(pt.x, pt.y);
+			break;
 		}
 		case WM_LBUTTONDOWN:
 		{
