@@ -2,6 +2,7 @@
 #include "ChiliWin.h"
 #include "ChiliException.h"
 #include "Keyboard.h"
+#include "Mouse.h"
 
 class Window
 {
@@ -47,6 +48,8 @@ public:
 	~Window();
 	Window(const Window&) = delete;
 	Window& operator=(const Window&) = delete;
+
+	void SetTitle(const std::string& title);// 设置窗口标题为指定字符串,仅用于测试功能
 private:
 	/* 窗口的消息机制处理函数, 设计成静态的原因是 我们不可以通过WinAPI调用类成员函数*/
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -55,9 +58,10 @@ private:
 	LRESULT HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 public:
 	Keyboard kbd;// 持有1个键盘,键盘类本质上是窗口类控制字符的一种延伸思想
+	Mouse mouse; // 持有1个鼠标
 private:
-	int width;
-	int height;
+	int width; // 游戏窗口宽度
+	int height;// 游戏窗口高度
 	HWND hWnd;// 被创建出的窗口的句柄
 };
 

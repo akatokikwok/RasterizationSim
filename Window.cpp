@@ -49,6 +49,8 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept
 
 // Window Stuff
 Window::Window(int width, int height, const char* name)
+	:width(width)
+	, height(height)
 {
 	// Client区域,不包括标题栏和边框
 	RECT wr;
@@ -57,10 +59,8 @@ Window::Window(int width, int height, const char* name)
 	wr.top = 100;
 	wr.bottom = height + wr.top;
 
-	if (FAILED(
-		AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
-		FALSE/*是否具备菜单*/))/*自适应匹配窗口尺寸*/ 
-	   ) 
+	if (AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
+		FALSE/*是否具备菜单*/) == 0)/*自适应匹配窗口尺寸*/
 	{
 		throw CHWND_LAST_EXCEPT();
 	}
@@ -81,6 +81,13 @@ Window::Window(int width, int height, const char* name)
 
 	// 呈现展示此窗口(使用句柄)
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
+}
+
+void Window::SetTitle(const std::string& title)
+{
+	if (SetWindowText(hWnd, title.c_str()) == 0) {
+		throw CHWND_LAST_EXCEPT();
+	}
 }
 
 Window::~Window()
@@ -104,7 +111,7 @@ LRESULT WINAPI Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		// forward message to window class handler
 		return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
 	}
-	
+
 	// 科普,窗口被创建 早于 WM_CREATE的时间点
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
@@ -149,6 +156,81 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 			kbd.OnChar(static_cast<unsigned char>(wParam));
 			break;
 			/*********** END KEYBOARD MESSAGES ***********/
+
+			/************* MOUSE MESSAGES ****************/
+		case WM_MOUSEMOVE:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);// 科普:一般lParam储存光标的坐标位置
+
+			// in client region -> log move, and log enter + capture mouse (if not previously in window)
+			if (pt.x >= 0 && pt.x < width && pt.y >= 0 && pt.y < height) {
+				mouse.OnMouseMove(pt.x, pt.y);
+				if (!mouse.IsInWindow()) {
+					SetCapture(hWnd);
+					mouse.OnMouseEnter();
+				}
+			}
+			// not in client -> log move / maintain capture if button down
+			else {
+				if (wParam & (MK_LBUTTON | MK_RBUTTON)) { // 若监测出来在离屏情况下同时按下了左键\右键,就仍然让窗口内仍接受光标的控制信息
+					mouse.OnMouseMove(pt.x, pt.y);
+				}
+				// button up -> release capture / log event for leaving
+				else { // 离屏了,且没有按键,就松开捕捉窗口
+					ReleaseCapture();
+					mouse.OnMouseLeave();
+				}
+			}
+
+			break;
+		}
+		case WM_LBUTTONDOWN:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			mouse.OnLeftPressed(pt.x, pt.y);
+			break;
+		}
+		case WM_RBUTTONDOWN:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			mouse.OnRightPressed(pt.x, pt.y);
+			break;
+		}
+		case WM_LBUTTONUP:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			mouse.OnLeftReleased(pt.x, pt.y);
+
+			// release mouse if outside of window
+			if (pt.x < 0 || pt.x >= width || pt.y < 0 || pt.y >= height) {
+				ReleaseCapture();
+				mouse.OnMouseLeave();
+			}
+
+			break;
+		}
+		case WM_RBUTTONUP:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			mouse.OnRightReleased(pt.x, pt.y);
+
+			// release mouse if outside of window
+			if (pt.x < 0 || pt.x >= width || pt.y < 0 || pt.y >= height) {
+				ReleaseCapture();
+				mouse.OnMouseLeave();
+			}
+			
+			break;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			const POINTS pt = MAKEPOINTS(lParam);
+			const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+			mouse.OnWheelDelta(pt.x, pt.y, delta);
+
+			break;
+		}
+		/************** END MOUSE MESSAGES **************/
 	}
 	// 返回默认的消息处理lpfn
 	return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -170,7 +252,7 @@ const char* Window::Exception::what() const noexcept
 		<< "[Error Code] " << GetErrorCode() << std::endl
 		<< "[Description] " << GetErrorString() << std::endl
 		<< GetOriginString();
-	
+
 	whatBuffer = oss.str();
 	return whatBuffer.c_str();
 }
