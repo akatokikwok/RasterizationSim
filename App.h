@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Window.h"
+#include "GrbTimer.h"
 
 class App
 {
@@ -13,4 +14,5 @@ private:
 	void DoFrame();
 private:
 	Window wnd;// 应用持有1个窗口
+	GrbTimer timer;// 应用持有1个计时器
 };
