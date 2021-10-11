@@ -172,11 +172,11 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 			}
 			// not in client -> log move / maintain capture if button down
 			else {
-				if (wParam & (MK_LBUTTON | MK_RBUTTON)) {
+				if (wParam & (MK_LBUTTON | MK_RBUTTON)) { // 若监测出来在离屏情况下同时按下了左键\右键,就仍然让窗口内仍接受光标的控制信息
 					mouse.OnMouseMove(pt.x, pt.y);
 				}
 				// button up -> release capture / log event for leaving
-				else {
+				else { // 离屏了,且没有按键,就松开捕捉窗口
 					ReleaseCapture();
 					mouse.OnMouseLeave();
 				}
