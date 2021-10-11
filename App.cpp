@@ -8,23 +8,15 @@ App::App()
 
 int App::Go()
 {
-	MSG msg;
-	BOOL gResult;
-	while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0) { // 持续检测消息,科普!: GetMessage方法在没有消息的时候它自身并不会工作
-		// TranslateMessage will post auxilliary WM_CHAR messages from key msgs
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+	while (true) {
+		// 持续监测消息,这个静态方法返回一个optional<int>
+		if (const auto ecode = Window::ProcessMessages()) { // 如若ecode有值,则佐证 此时正在退出,即走进了WM_Quit(返回true),非WM_QUIT消息则返回false,进不来这个if
+			// if return optional has value, means we're quitting so return exit code
+			return *ecode;
+		}
 
-		DoFrame();
+		DoFrame();// 如若没收到消息,亦或是退出消息,则正常执行帧逻辑
 	}
-
-	// check if GetMessage call itself borked
-	if (gResult == -1) {
-		throw CHWND_LAST_EXCEPT();
-	}
-
-	// wParam here is the value passed to PostQuitMessage
-	return msg.wParam;
 }
 
 void App::DoFrame()
