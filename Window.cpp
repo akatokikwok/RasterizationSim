@@ -57,10 +57,9 @@ Window::Window(int width, int height, const char* name)
 	wr.top = 100;
 	wr.bottom = height + wr.top;
 
-	if (FAILED(
-		AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
-			FALSE/*是否具备菜单*/))/*自适应匹配窗口尺寸*/
-		) {
+	if (AdjustWindowRect(&wr/*裁剪矩形*/, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_OVERLAPPEDWINDOW | WS_SYSMENU,
+			FALSE/*是否具备菜单*/) == 0)/*自适应匹配窗口尺寸*/
+	{
 		throw CHWND_LAST_EXCEPT();
 	}
 
@@ -80,6 +79,13 @@ Window::Window(int width, int height, const char* name)
 
 	// 呈现展示此窗口(使用句柄)
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
+}
+
+void Window::SetTitle(const std::string& title)
+{
+	if (SetWindowText(hWnd, title.c_str()) == 0) {
+		throw CHWND_LAST_EXCEPT();
+	}
 }
 
 Window::~Window()
